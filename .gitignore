@@ -2,6 +2,7 @@
 summary.md
 summary_resources
 .env
+**/*.apk
 
 # JetBrains
 .idea/
