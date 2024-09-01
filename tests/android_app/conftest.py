@@ -4,7 +4,6 @@ import allure
 import allure_commons
 import pytest
 from appium import webdriver
-from appium.options.android import UiAutomator2Options
 from selene import browser, support
 
 import config
@@ -13,34 +12,10 @@ from selene_in_action import utils
 
 @pytest.fixture(scope='function', autouse=True)
 def mobile_management():
-    options = UiAutomator2Options()
-
-    if config.deviceName:
-        options.set_capability('deviceName', config.deviceName)
-
-    if config.appWaitActivity:
-        options.set_capability('appWaitActivity', config.appWaitActivity)
-
-    options.set_capability('app',
-                           config.app if (config.app.startswith('/') or config.runs_on_bstack or
-                                          config.app.startswith('C:\\'))
-                           else utils.path.abs_path_from_root(config.app))
-
-    if config.runs_on_bstack:
-        options.set_capability(
-            'bstack:options', {
-                'projectName': 'First Python project',
-                'buildName': 'browserstack-build-1',
-                'sessionName': 'BStack first_test',
-
-                'userName': config.bstack_userName,
-                'accessKey': config.bstack_accessKey,
-            })
-
     with allure.step('init app session'):
         browser.config.driver = webdriver.Remote(
             command_executor=config.remote_url,
-            options=options
+            options=config.driver_options()
         )
 
     browser.config.timeout = float(os.getenv('timeout', '10.0'))
@@ -65,7 +40,7 @@ def mobile_management():
 
     session_id = browser.driver.session_id
 
-    with allure.step('tear down app session'):
+    with allure.step('tear down app session with id: ' + session_id):
         browser.quit()
 
     if config.runs_on_bstack:
